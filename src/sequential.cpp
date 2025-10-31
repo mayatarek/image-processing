@@ -1,11 +1,15 @@
+#include "sequentialFunction.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <cmath>
+#include <chrono>
 
 using namespace cv;
 using namespace std;
+using namespace chrono;
 
-int main() {
+
+double sequentialFunction() {
 
     Mat img = imread("../data/cat.jpeg", IMREAD_GRAYSCALE);  //load img
     if (img.empty()) {
@@ -23,6 +27,8 @@ int main() {
     Mat edges=Mat::zeros(img.size(), CV_8UC1);
     int rows=img.rows;
     int cols=img.cols;
+
+    auto start = high_resolution_clock::now();
 
     //loop on every pixel except the edgemost picels
     for (int i=1;i<rows-1;i++) {
@@ -50,12 +56,19 @@ int main() {
         }
     }
 
+    auto end = high_resolution_clock::now();  
+    double T_S = duration<double, milli>(end - start).count() / 1000.0;  // In seconds
+
+    cout << "T_S: " << T_S << " s" << endl;
+
     imshow("Original", img);
     imshow("Edges", edges);
     //save the edges image
     imwrite("edges.jpg", edges);
     cout << "Saved edges.jpg in current folder!" << endl;
 
-    waitKey(0);
-    return 0;
+    // waitKey(0);
+    return T_S;
 }
+
+
