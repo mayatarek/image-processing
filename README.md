@@ -12,10 +12,11 @@ Logic:
 ### Complile and run sequential code
 ```
 cd src
+g++ sequential.cpp -o sequential -fopenmp `pkg-config --cflags --libs opencv4`
 ./sequential
 ```
 
-g++ sequential.cpp -o sequential -fopenmp `pkg-config --cflags --libs opencv4`
+
 
 ### Complile and run parallel code
 ```
