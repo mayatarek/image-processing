@@ -88,7 +88,7 @@ vector<double> parallelFunction() {
 
     }
 
-    waitKey(0);
+    // waitKey(0);
     return T_Ps;
 }
 
