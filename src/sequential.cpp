@@ -1,3 +1,4 @@
+#include "sequentialFunction.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <cmath>
@@ -7,7 +8,8 @@ using namespace cv;
 using namespace std;
 using namespace chrono;
 
-int main() {
+
+double sequentialFunction() {
 
     Mat img = imread("../data/cat.jpeg", IMREAD_GRAYSCALE);  //load img
     if (img.empty()) {
@@ -65,6 +67,8 @@ int main() {
     imwrite("edges.jpg", edges);
     cout << "Saved edges.jpg in current folder!" << endl;
 
-    waitKey(0);
-    return 0;
+    // waitKey(0);
+    return T_S;
 }
+
+

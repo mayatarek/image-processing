@@ -1,3 +1,4 @@
+#include "parallelFunction.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <cmath>
@@ -6,16 +7,22 @@
 #include <iomanip>   
 #include <omp.h>
 
+
+
+
 using namespace cv;
 using namespace std;
 using namespace chrono;
 
-int main() {
+vector<double> parallelFunction() {
+
+    vector<int> thread_counts = {1, 2, 4, 8};
+    vector<double> T_Ps;
 
     Mat img = imread("../data/cat.jpeg", IMREAD_GRAYSCALE);  //load img & convert to grayscale
     if (img.empty()) {
         cout << "Error: could not open image!" << endl;
-        return -1;
+        return T_Ps;
     }
     else{
         cout << "Image loaded successfully" << endl;
@@ -30,7 +37,6 @@ int main() {
     int rows=img.rows;
     int cols=img.cols;
 
-    vector<int> thread_counts = {1, 2, 4, 8};
 
    for (int current_thread_count : thread_counts) {
         Mat edges = Mat::zeros(img.size(), CV_8UC1);  // Reset edges for each run
@@ -70,6 +76,8 @@ int main() {
         double T_P = duration<double, milli>(end - start).count() / 1000.0;  // In seconds
 
         cout << "T_P: " << T_P<< " s for "<< current_thread_count<< " threads" << endl;
+        
+        T_Ps.push_back(T_P);
 
         imshow("Original", img);
         imshow("Edges", edges);
@@ -81,5 +89,7 @@ int main() {
     }
 
     waitKey(0);
-    return 0;
+    return T_Ps;
 }
+
+

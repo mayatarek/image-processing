@@ -18,9 +18,15 @@ g++ sequential.cpp -o sequential -fopenmp `pkg-config --cflags --libs opencv4`
 
 
 
+
 ### Complile and run parallel code
 ```
 cd src
 g++ parallel.cpp -o parallel -fopenmp `pkg-config --cflags --libs opencv4`
 ./parallel
 ```
+
+### Compile and run main code
+cd src
+g++ -O2 -fopenmp -o main main.cpp parallel.cpp sequential.cpp $(pkg-config --cflags --libs opencv4)
+./main
