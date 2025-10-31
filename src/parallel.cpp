@@ -20,9 +20,12 @@ int main() {
     int Gx[3][3] = {{-1, 0, 1},{-2, 0, 2},{-1, 0, 1}};
     int Gy[3][3] = {{-1, -2, -1},{0, 0, 0},{1, 2, 1}};
 
+
     Mat edges=Mat::zeros(img.size(), CV_8UC1); // create an empty image for edges
     int rows=img.rows;
     int cols=img.cols;
+
+    double T_P = 0.0;
     
     #pragma omp parallel for collapse(2) 
     //loop on every pixel except the edgemost picels

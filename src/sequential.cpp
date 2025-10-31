@@ -1,9 +1,11 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <cmath>
+#include <chrono>
 
 using namespace cv;
 using namespace std;
+using namespace chrono;
 
 int main() {
 
@@ -23,6 +25,8 @@ int main() {
     Mat edges=Mat::zeros(img.size(), CV_8UC1);
     int rows=img.rows;
     int cols=img.cols;
+
+    auto start = high_resolution_clock::now();
 
     //loop on every pixel except the edgemost picels
     for (int i=1;i<rows-1;i++) {
@@ -49,6 +53,11 @@ int main() {
                 edges.at<uchar>(i, j) = 0;
         }
     }
+
+    auto end = high_resolution_clock::now();  
+    double T_S = duration<double, milli>(end - start).count() / 1000.0;  // In seconds
+
+    cout << "T_S: " << T_S << " s" << endl;
 
     imshow("Original", img);
     imshow("Edges", edges);
