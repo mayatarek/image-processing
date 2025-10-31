@@ -1,4 +1,5 @@
 #include "sequentialFunction.h"
+#include "CacheSensitiveTest.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <cmath>
@@ -7,6 +8,7 @@
 using namespace cv;
 using namespace std;
 using namespace chrono;
+
 
 
 double sequentialFunction() {
@@ -20,9 +22,11 @@ double sequentialFunction() {
         cout << "Image loaded successfully" << endl;
     }
     
-    int T = 128;
+    int T = 30;
     int Gx[3][3] = {{-1, 0, 1},{-2, 0, 2},{-1, 0, 1}};
     int Gy[3][3] = {{-1, -2, -1},{0, 0, 0},{1, 2, 1}};
+
+    resize(img, img, Size(1000, 1000));
 
     Mat edges=Mat::zeros(img.size(), CV_8UC1);
     int rows=img.rows;
@@ -68,6 +72,7 @@ double sequentialFunction() {
     cout << "Saved edges.jpg in current folder!" << endl;
 
     // waitKey(0);
+    cacheSensitiveTest(img);
     return T_S;
 }
 

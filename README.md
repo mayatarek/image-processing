@@ -28,5 +28,9 @@ g++ parallel.cpp -o parallel -fopenmp `pkg-config --cflags --libs opencv4`
 
 ### Compile and run main code
 cd src
-g++ -O2 -fopenmp -o main main.cpp parallel.cpp sequential.cpp $(pkg-config --cflags --libs opencv4)
+g++ -O2 -fopenmp -o main main.cpp parallel.cpp sequential.cpp cacheTest.cpp $(pkg-config --cflags --libs opencv4)
 ./main
+
+
+### Get cache test data
+perf stat -e cache-misses,cache-references ./main
