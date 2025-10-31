@@ -1,0 +1,61 @@
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <cmath>
+
+using namespace cv;
+using namespace std;
+
+int main() {
+
+    Mat img = imread("../data/cat.jpeg", IMREAD_GRAYSCALE);  //load img & convert to grayscale
+    if (img.empty()) {
+        cout << "Error: could not open image!" << endl;
+        return -1;
+    }
+    else{
+        cout << "Image loaded successfully" << endl;
+    }
+    
+    int T = 128;
+    int Gx[3][3] = {{-1, 0, 1},{-2, 0, 2},{-1, 0, 1}};
+    int Gy[3][3] = {{-1, -2, -1},{0, 0, 0},{1, 2, 1}};
+
+    Mat edges=Mat::zeros(img.size(), CV_8UC1); // create an empty image for edges
+    int rows=img.rows;
+    int cols=img.cols;
+    
+    #pragma omp parallel for collapse(2) 
+    //loop on every pixel except the edgemost picels
+    for (int i=1;i<rows-1;i++) {
+        for (int j=1;j<cols-1;j++) {
+            int sum_x=0;
+            int sum_y =0;
+            //multiply each pixel and neighbors by Gx and Gy
+            for (int m= -1; m<= 1; m++) {
+                for (int n =-1; n<= 1; n++) {
+                    int pixel = img.at<uchar>(i+m,j+n);
+                    sum_x +=pixel*Gx[m+1][n+1];
+                    sum_y += pixel*Gy[m+1][n+1];
+                }
+            }
+
+            //check sorbel result
+            double mag = sqrt(sum_x*sum_x + sum_y*sum_y);
+
+            //if above threshold make it an edge else dont
+            if (mag > T)
+                edges.at<uchar>(i, j) = 255;
+            else
+                edges.at<uchar>(i, j) = 0;
+        }
+    }
+
+    imshow("Original", img);
+    imshow("Edges", edges);
+    //save the edges image
+    imwrite("edges.jpg", edges);
+    cout << "Saved edges.jpg in current folder!" << endl;
+
+    waitKey(0);
+    return 0;
+}

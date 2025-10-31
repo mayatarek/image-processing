@@ -14,3 +14,12 @@ Logic:
 cd src
 ./sequential
 ```
+
+g++ parallel.cpp -o parallel -fopenmp `pkg-config --cflags --libs opencv4`
+
+### Complile and run parallel code
+```
+cd src
+g++ parallel.cpp -o parallel -fopenmp `pkg-config --cflags --libs opencv4`
+./parallel
+```
