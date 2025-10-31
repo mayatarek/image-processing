@@ -1,4 +1,5 @@
 #include "parallelFunction.h"
+#include "CacheSensitiveTest.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <cmath>
@@ -28,9 +29,11 @@ vector<double> parallelFunction() {
         cout << "Image loaded successfully" << endl;
     }
     
-    int T = 128;
+    int T = 30;
     int Gx[3][3] = {{-1, 0, 1},{-2, 0, 2},{-1, 0, 1}};
     int Gy[3][3] = {{-1, -2, -1},{0, 0, 0},{1, 2, 1}};
+
+    resize(img, img, Size(4000, 4000));
 
 
     Mat edges=Mat::zeros(img.size(), CV_8UC1); // create an empty image for edges
@@ -89,6 +92,7 @@ vector<double> parallelFunction() {
     }
 
     // waitKey(0);
+    cacheSensitiveTest(img);
     return T_Ps;
 }
 
