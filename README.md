@@ -9,22 +9,6 @@ Logic:
 5- by calculating the eucladien distance (the root of the sum of Gx and Gy squared), we can get the "avergae" of the vertical and horizontal processing results
 6- the resulting vertical and horizontal intensity will be compared to T (threshold) - since each pixel can be from 0-255, the threshold of change can be 256/2 or 128
 
-### Complile and run sequential code
-```
-cd src
-g++ sequential.cpp -o sequential -fopenmp `pkg-config --cflags --libs opencv4`
-./sequential
-```
-
-
-
-
-### Complile and run parallel code
-```
-cd src
-g++ parallel.cpp -o parallel -fopenmp `pkg-config --cflags --libs opencv4`
-./parallel
-```
 
 ### Compile and run main code
 cd src

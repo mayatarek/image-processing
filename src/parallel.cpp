@@ -94,7 +94,7 @@ vector<double> parallelFunction() {
     }
 
     // waitKey(0);
-    cacheSensitiveTest(img);
+    cacheSensitiveTestP(img);
     return T_Ps;
 }
 
