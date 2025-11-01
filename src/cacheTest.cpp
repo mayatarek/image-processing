@@ -49,6 +49,13 @@ void cacheSensitiveTestS(const Mat& img) {
 }
 
 
+// so for the good locality, we have a pointer for each row since its stored major. 
+// And we use that pointer and just walk done the row to get each value. 
+// However, for the bad locality, we don't have a pointer since it's not stored column major. 
+// So we need to use img.at<uchar>(i, j); which explicitly tells us how many rows i to go
+// down and how mnay columns j. Ofc this also takes more time since you need 
+// to calc the i and j for each value, u dont move down the row like in the good locality.
+
 
 void cacheSensitiveTestP(const Mat& img) {
 
@@ -75,7 +82,7 @@ void cacheSensitiveTestP(const Mat& img) {
     double t1 = duration<double>(end1 - start1).count();
 
 
-    // BAD LOCALITY 34n access by columns so w3e jump over whole rest of row to access next column
+    // BAD LOCALITY 34n access by columns so we jump over whole rest of row to access next column
     auto start2 = high_resolution_clock::now();
 
     for (int r = 0; r < 50; r++) {
@@ -94,4 +101,5 @@ void cacheSensitiveTestP(const Mat& img) {
     cout<< endl;
 }
 }
+
 
