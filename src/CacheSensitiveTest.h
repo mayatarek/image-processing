@@ -5,6 +5,7 @@
 
 using namespace cv;
 
-void cacheSensitiveTest(const Mat& img); 
+void cacheSensitiveTestS(const Mat& img); 
+void cacheSensitiveTestP(const Mat& img); 
 
 #endif
