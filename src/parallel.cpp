@@ -48,13 +48,14 @@ vector<double> parallelFunction() {
 
         omp_set_num_threads(current_thread_count);
 
-            #pragma omp parallel for collapse(2) 
+            #pragma omp parallel for collapse(2) schedule(guided) 
             //loop on every pixel except the edgemost picels
             for (int i=1;i<rows-1;i++) {
                 for (int j=1;j<cols-1;j++) {
                     int sum_x=0;
                     int sum_y =0;
                     //multiply each pixel and neighbors by Gx and Gy
+                    #pragma omp simd // use SIMD 
                     for (int m= -1; m<= 1; m++) {
                         for (int n =-1; n<= 1; n++) {
                             int pixel = img.at<uchar>(i+m,j+n);
@@ -87,6 +88,7 @@ vector<double> parallelFunction() {
         //save the edges image
         string filename = "edges_" + to_string(current_thread_count) + ".jpg";
         imwrite(filename, edges);
+        
         cout << "Saved "<<filename <<" in current folder!" << endl;
 
     }
