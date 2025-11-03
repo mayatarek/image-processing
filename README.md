@@ -15,9 +15,11 @@
 
 ---
 ### Compile and run main code
-cd src
-g++ -O2 -fopenmp -o main main.cpp parallel.cpp sequential.cpp cacheTest.cpp $(pkg-config --cflags --libs opencv4)
+- cd src
+- g++ -O2 -fopenmp -o main main.cpp parallel.cpp sequential.cpp cacheTest.cpp $(pkg-config --cflags --libs opencv4)
 ./main
+
+
 
 
 ### Get cache test data
