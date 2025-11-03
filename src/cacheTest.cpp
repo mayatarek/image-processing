@@ -87,7 +87,7 @@ void cacheSensitiveTestP(const Mat& img) {
 
     // BAD LOCALITY 
     auto start2 = high_resolution_clock::now();
-    #pragma omp parallel for collapse(2)  
+    #pragma omp parallel for collapse(2) reduction(+:sink) 
     for (int r = 0; r < 50; r++) {
         for (int j = 0; j < cols; j++) {
             for (int i = 0; i < rows; i++) {
