@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <chrono>
+#include <omp.h>
 
 using namespace cv;
 using namespace std;
@@ -14,7 +15,7 @@ void cacheSensitiveTestS(const Mat& img) {
     int rows = img.rows;
     int cols = img.cols;
 
-    volatile long long sink = 0; // prevents optimization
+    volatile long long sink = 0; 
 
     // GOOD LOCALITY
     auto start1 = high_resolution_clock::now();
@@ -57,6 +58,7 @@ void cacheSensitiveTestS(const Mat& img) {
 // to calc the i and j for each value, u dont move down the row like in the good locality.
 
 
+
 void cacheSensitiveTestP(const Mat& img) {
 
     vector<int> thread_counts = {1, 2, 4, 8};
@@ -64,12 +66,14 @@ void cacheSensitiveTestP(const Mat& img) {
     int rows = img.rows;
     int cols = img.cols;
 
-    volatile long long sink = 0; // prevents optimization
+    volatile long long sink = 0; 
 
     for (int current_thread_count : thread_counts) {
+        omp_set_num_threads(current_thread_count); 
 
-    // GOOD LOCALITY 34n we access kol adjacent byte after b3d
+    // GOOD LOCALITY
     auto start1 = high_resolution_clock::now();
+    #pragma omp parallel for collapse(2) reduction(+:sink) 
     for (int r = 0; r < 50; r++) { 
         for (int i = 0; i < rows; i++) {
             const uchar* row_ptr = img.ptr<uchar>(i);
@@ -79,12 +83,11 @@ void cacheSensitiveTestP(const Mat& img) {
         }
     }
     auto end1 = high_resolution_clock::now();
-    double t1 = duration<double>(end1 - start1).count();
+    double t1 = duration<double>(end1 - start1).count();  
 
-
-    // BAD LOCALITY 34n access by columns so we jump over whole rest of row to access next column
+    // BAD LOCALITY 
     auto start2 = high_resolution_clock::now();
-
+    #pragma omp parallel for collapse(2)  
     for (int r = 0; r < 50; r++) {
         for (int j = 0; j < cols; j++) {
             for (int i = 0; i < rows; i++) {
@@ -93,7 +96,7 @@ void cacheSensitiveTestP(const Mat& img) {
         }
     }
     auto end2 = high_resolution_clock::now();
-    double t2 = duration<double>(end2 - start2).count();
+    double t2 = duration<double>(end2 - start2).count();  
 
     cout << "\n--- Cache Sensitivity Test, "<< current_thread_count<<" Threads---\n";
     cout << "Row-major time (Good):   " << t1 << " s\n";
@@ -101,5 +104,3 @@ void cacheSensitiveTestP(const Mat& img) {
     cout<< endl;
 }
 }
-
-
