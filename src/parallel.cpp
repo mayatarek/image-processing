@@ -48,7 +48,7 @@ vector<double> parallelFunction() {
 
         omp_set_num_threads(current_thread_count);
 
-            #pragma omp parallel for collapse(2) schedule(guided) 
+            #pragma omp parallel for collapse(2) schedule(guided) //collapsing loops for better load balancing, schedule guided
             //loop on every pixel except the edgemost picels
             for (int i=1;i<rows-1;i++) {
                 for (int j=1;j<cols-1;j++) {
@@ -88,13 +88,12 @@ vector<double> parallelFunction() {
         //save the edges image
         string filename = "edges_" + to_string(current_thread_count) + ".jpg";
         imwrite(filename, edges);
-        
         cout << "Saved "<<filename <<" in current folder!" << endl;
 
     }
 
     // waitKey(0);
-    cacheSensitiveTestP(img);
+    cacheSensitiveTest(img);
     return T_Ps;
 }
 
