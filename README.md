@@ -20,7 +20,10 @@
 ./main
 
 
-
+### How to run MPI code
+- cd src
+- mpicxx -std=c++17 mpi.cpp -o mpi_sobel `pkg-config --cflags --libs opencv4`
+- mpirun -np 4 ./mpi
 
 ### Get cache test data
 perf stat -e cache-misses,cache-references ./main
