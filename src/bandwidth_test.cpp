@@ -1,4 +1,4 @@
-// measureing latency of MPI communication independt of computation
+// here we test bandwidth with large meassges 
 #include <mpi.h>
 #include <iostream>
 using namespace std;
@@ -17,11 +17,11 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    const int msg_size = 1; //byte -> small for latency test as needed
+    const int msg_size = 10 * 1024 * 1024; //10 MB message size for bandwidth test
     vector<char> send_buf(msg_size, 'a'); //buffer to send
     vector<char> recv_buf(msg_size); //buffer to receive
 
-    const int iterations = 1000; //number of iterations for averaging
+    const int iterations = 100; //number of iterations for averaging
     MPI_Barrier(MPI_COMM_WORLD); // so all ranks start together
     double tstart = MPI_Wtime(); //start time
 
@@ -37,12 +37,13 @@ int main(int argc, char** argv) {
 
     MPI_Barrier(MPI_COMM_WORLD); // wait for all ranks to finish
     double tend = MPI_Wtime(); //end time
-    if (rank ==0) {
+
+    if (rank==0){
+
         double round_trip = (tend - tstart) / iterations; 
-        double latency = round_trip / 2.0; // one way latency
-        cout << "average latency for " << msg_size << " byte message: " << latency * 1e6 << " microseconds\n"; 
-
-
+        double latency = round_trip / 2.0; 
+        double bandwidth = (msg_size / latency) / 1e6; // MB/s
+        cout << "average bandwidth for " << msg_size << " byte message: " << bandwidth << " MB/s\n";
     }
     MPI_Finalize();
     return 0;
