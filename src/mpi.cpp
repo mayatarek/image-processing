@@ -5,6 +5,7 @@
 #include <cmath> //use sqrt
 using namespace cv; //namespace 
 using namespace std;
+#include <fstream> 
 
 int main(int argc, char** argv) {
     // initialize MPI
@@ -132,7 +133,24 @@ int main(int argc, char** argv) {
     MPI_Barrier(MPI_COMM_WORLD); // wait for all ranks to finish
     double tend = MPI_Wtime(); //end timing
     double elapsed = tend - tstart; //elapsed time
-    if (rank==0) cout << "MPI total time: "<< elapsed << " s\n"; // rank 0 is the master takes image data and prints 
+
+
+// for strong scaling analysis, save times to txt file so automate calcultions 
+    if (rank == 0) {
+        
+        cout << "Processes: " << nprocs << ", Time: " << elapsed << " s\n";   
+        
+        // save to file
+        ofstream outfile("mpi_times.txt", ios::app); // append mode
+        if (outfile.is_open()) {
+            outfile << nprocs << " " << elapsed << "\n";
+            outfile.close();
+        }
+    }
+
+
+
+
     vector<int> recvcounts(nprocs), recvdispls(nprocs); // prepare to gather results
     for (int r=0;r<nprocs;++r) { // gather counts
         recvcounts[r] = counts[r]; // each rank's data size
