@@ -7,6 +7,7 @@ using namespace cv; //namespace
 using namespace std;
 
 int main(int argc, char** argv) {
+    // initialize MPI
     MPI_Init(&argc, &argv); // Initialize MPI
     int rank, nprocs;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank); //id
@@ -14,6 +15,7 @@ int main(int argc, char** argv) {
 
     Mat img; //matrix to hold the image
     int rows=0, cols=0;
+    //only rank 0 loads the image and broadcasts size
     if (rank==0) {  //rank 0 loads the image
         img = imread("../data/cat.jpeg", IMREAD_GRAYSCALE); //load img & convert to grayscale
         if (img.empty()) { //handel if image not loaded
@@ -26,11 +28,11 @@ int main(int argc, char** argv) {
         cout<<"Rank 0: image "<<rows<<" x "<<cols<<"\n"; // print image size
     }
 
-   
+   // Broadcast image size to all ranks
     MPI_Bcast(&rows, 1, MPI_INT, 0, MPI_COMM_WORLD); //broadcast rows from ranl 0 to all ranks
     MPI_Bcast(&cols, 1, MPI_INT, 0, MPI_COMM_WORLD); //broadcast cols from rank 0 to all ranks
 
-
+   // divide work among ranks
     vector<int> counts(nprocs), displs(nprocs); //count nuber of processes (stores how many pixels each rank gets), displs (stores where each rank's data starts in the overall array)
     int base = rows / nprocs; //base number of rows per process
     int rem  = rows % nprocs; // if not divisible, some ranks get one extra row
@@ -40,13 +42,13 @@ int main(int argc, char** argv) {
     displs[0]=0; // first rank starts at 0
     for (int r=1; r<nprocs; ++r) displs[r] = displs[r-1] + counts[r-1]; // rank r starts after all previous ranks' data
 
-    
+    //local rows and extra halo rows
     int local_rows = counts[rank] / cols; //number of rows for this rank (each process knows how many rows it is responsible for)
   
     vector<unsigned char> local_buf((local_rows + 2) * cols, 0);  //halo rows (extra top and bottom row) to boundry data from neighboring ranks
    
     vector<unsigned char> recvbuf(local_rows * cols); //buffer to receive scattered data (has rows assigned to this rank)
-
+    //scatter image data to all ranks
     MPI_Scatterv(rank==0 ? img.data : nullptr, counts.data(), displs.data(), MPI_UNSIGNED_CHAR, //scatter data from rank 0 to all ranks
                  recvbuf.data(), local_rows * cols, MPI_UNSIGNED_CHAR,
                  0, MPI_COMM_WORLD);
@@ -59,7 +61,7 @@ int main(int argc, char** argv) {
    
     vector<unsigned char> local_edges(local_rows * cols, 0); //buffer to hold edge-detected results for this rank
 
-   
+   // Sobel operator kernels
     int Gx[3][3] = {{-1,0,1},{-2,0,2},{-1,0,1}};
     int Gy[3][3] = {{-1,-2,-1},{0,0,0},{1,2,1}};
     int T = 30; //threshold
@@ -82,7 +84,7 @@ int main(int argc, char** argv) {
     int start_r = 2; // skop first row 
     int end_r   = local_rows - 1; // skip last row
     if (local_rows <= 2) { start_r = 1; end_r = local_rows; } // skip edges if only 2 rows because we need neighbors
-
+    // compute edges for inner rows (not halo rows)
     for (int currentr = start_r; currentr <= end_r; ++currentr) { //
         for (int currentc = 1; currentc < cols-1; ++currentc) {
             int sumx = 0, sumy = 0;
@@ -98,7 +100,7 @@ int main(int argc, char** argv) {
         }
     }
 
-   
+   // wait for halo exchanges to complete before processing halo rows
     if (reqcount > 0) MPI_Waitall(reqcount, reqs, MPI_STATUSES_IGNORE); // wait for all halo exchanges to complete
     for (int c=1; c<cols-1; ++c) { //compute top halo row
         int lr = 1; // first row of local_buf
@@ -139,11 +141,11 @@ int main(int argc, char** argv) {
     for (int r=1;r<nprocs;++r) recvdispls[r] = recvdispls[r-1] + recvcounts[r-1]; // each rank starts after all previous ranks' data
     vector<unsigned char> final_buf; // final buffer to hold gathered results
     if (rank==0) final_buf.resize(rows * cols); // only rank 0 needs to hold the final image
-
+   // gather results to rank 0
     MPI_Gatherv(local_edges.data(), local_rows * cols, MPI_UNSIGNED_CHAR, //gather results to rank 0 all ranks send their local edge data
                 rank==0 ? final_buf.data() : nullptr, recvcounts.data(), recvdispls.data(), MPI_UNSIGNED_CHAR,
                 0, MPI_COMM_WORLD); 
-
+    // rank 0 saves the final image
     if (rank == 0) {
         Mat edges(rows, cols, CV_8UC1, final_buf.data()); //create opencv image for final gathered data
         imwrite("mpi_edges.jpg", edges);
