@@ -31,6 +31,7 @@ with open(IMAGE_PATH, "rb") as f:
 
 start = time.time()
 request_count = -1
+responses = [] 
 
 while time.time() - start < 60:
     stub = next(stub_cycle)
@@ -47,8 +48,19 @@ while time.time() - start < 60:
 
         # with open(output_path, "wb") as out:
         #     out.write(resp.edges)
+        responses.append((request_count, resp.edges))
         print(f"OK latency={resp.latency:.3f}s total={time.time()-t0:.3f}s")
 
     except Exception:
         print(f"Server failed → retrying in time {time.time()-t0} ")
         time.sleep(0.2)
+
+OUTPUT_DIR = os.path.join(BASE_DIR, "..", "output")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+
+for req_num, edges_bytes in responses:
+    filename = f"response{req_num}.jpeg"
+    output_path = os.path.join(OUTPUT_DIR, filename)
+    with open(output_path, "wb") as f:
+        f.write(edges_bytes)
