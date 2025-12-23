@@ -50,3 +50,21 @@ which python
 
 python {command: ex. server.py 50051, server.py 50052, client.py}
 ```
+
+### Failures
+There are 2 ways to inject failures
+1- server crash
+    - either manually (stop a server mid running) or
+    - i added a way to make a server autofail after a specified period
+        To use it, instead of starting a server using
+        ```cmd
+            python server.py {port}
+        ```
+
+        use this
+        ``` cmd
+            python server.py {port} {optional: --kill} {optional: --count (time in secs), deafult 10 secs}
+
+            #example usage
+            python server.py 50051 --kill -- count 5
+        ```
