@@ -54,8 +54,11 @@ python {command: ex. server.py 50051, server.py 50052, client.py}
 ### Failures
 There are 2 ways to inject failures
 1- server crash
+    **Explanation**
+        Server failing and crashing
+    **Usage**
     - either manually (stop a server mid running) or
-    - i added a way to make a server autofail after a specified period
+    - i added a way to make a server autofail after a specified period in failing_server.py
         To use it, instead of starting a server using
         ```cmd
             python server.py {port}
@@ -63,8 +66,23 @@ There are 2 ways to inject failures
 
         use this
         ``` cmd
-            python server.py {port} {optional: --kill} {optional: --count (time in secs), deafult 10 secs}
+            python failing_server.py {port} --kill {optional: --count (time in secs), deafult 10 secs}
 
             #example usage
-            python server.py 50051 --kill -- count 5
+            python failing_server.py 50051 --kill -- count 5
         ```
+
+2- client timeout
+    **Explanation**
+        timeout is very small, simulating a slow network
+    **Usage**
+        instead of
+        ```cmd
+            python client.py
+        ```
+
+        use this
+        ```cmd
+            python failing_client.py
+        ```
+

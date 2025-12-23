@@ -23,7 +23,7 @@ def sobel_edge_detection(image_bytes):
     print(f"done 1/{rows}")
 #//loop on every pixel except the edgemost picels
     for i in range(1, rows-1):
-        print(f"done 3/{rows}")
+        print(f"done {i}/{rows}")
         for j in range(1, cols-1):
             region = img[i-1:i+2, j-1:j+2]
             sum_x = np.sum(region * Gx)

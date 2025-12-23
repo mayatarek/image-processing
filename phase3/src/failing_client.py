@@ -26,6 +26,12 @@ with open(IMAGE_PATH, "rb") as f:
 
 NORMAL_TIMEOUT = 10
 DISRUPTION_TIMEOUT = 0.1
+better_timeout = 0.5
+
+def better_network(meow):
+    if meow <= 5:
+        return meow*2
+    return 10
 
 start = time.time()
 request_count = -1
@@ -36,8 +42,21 @@ while time.time() - start < 60:
     t0 = time.time()
     try:
         request_count += 1
-
-        timeout_val = NORMAL_TIMEOUT
+        
+        ##for the simulated failure
+        elapsed = time.time() - start
+        if 20<= elapsed:
+            print("Simulating network getting better")
+            
+            print(f"timeout is {better_timeout}")
+            timeout_val = better_timeout
+            better_timeout = better_network(better_timeout)
+        elif 10 <= elapsed:
+            print("Simulating network disruption meow yarab yeshta8al")
+            timeout_val = DISRUPTION_TIMEOUT
+       
+        else:
+            timeout_val = NORMAL_TIMEOUT
 
         resp = stub.DetectEdges(
             edge_pb2.ImageRequest(image=image, req_num= request_count),
