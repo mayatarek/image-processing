@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+service EdgeService {
+  rpc DetectEdges (ImageRequest) returns (ImageResponse);
+}
+
+message ImageRequest {
+  bytes image = 1;
+  int32 req_num = 2;
+}
+
+message ImageResponse {
+  bytes edges = 1;
+  double latency = 2;
+}
