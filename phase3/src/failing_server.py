@@ -43,17 +43,13 @@ def serve(port):
     server.add_insecure_port(f"[::]:{port}")
     server.start()
     print(f"Server started on port {port}")
-    # server.wait_for_termination()
-    while True:
-      print(f"Server on port {port} will sleep for 30")
-      time.sleep(30)
-      print(f"Server on port {port} woke up")
+    return server
 
 #this is failure number 1, kill the server
-def auto_crash(delay_sec):
+def auto_crash(server, delay_sec):
     time.sleep(delay_sec)
     print(f"Simulating server crash after {delay_sec}s")
-    os.kill(os.getpid(), signal.SIGTERM)
+    server.stop(grace=0)
 
 if __name__ == "__main__":
 
@@ -61,11 +57,33 @@ if __name__ == "__main__":
     parser.add_argument("port", type=int, help="Port to run the gRPC server on")
     parser.add_argument("--kill", action="store_true", help="Automatically crash the server")
     parser.add_argument("--count", type=int, default=10, help="Seconds before auto crash")
+    parser.add_argument("--recovery", type=int, default=5, help="Seconds to wait before recover after crash")
     args = parser.parse_args()
+    
+    RECOVERY_DELAY = args.recovery
 
-    if args.kill:
-        # start crash thread
-        threading.Thread(target=auto_crash, args=(args.count,), daemon=True).start()
 
-    #lamma ne run python server.py 50051, el server.py de argv[0] wel 50051 de argv[1]
-    serve(args.port)
+    while True: 
+      server = None 
+      try:
+            #lamma ne run python server.py 50051, el server.py de argv[0] wel 50051 de argv[1]
+            server = serve(args.port)
+            if args.kill:
+                threading.Thread(target=auto_crash, args=(server, args.count), daemon=True).start()
+
+            server.wait_for_termination()  # Block until stopped (crash aw interrupt b2a)
+            print(f"Server on port {args.port} stopped")
+
+      except KeyboardInterrupt:
+            print(f"Manual interrupt on port {args.port}")
+            if server:
+                server.stop(0)
+            break
+
+      except Exception as e:
+            print(f"Unexpected error on port {args.port}: {e}")
+
+      print(f"Waiting {RECOVERY_DELAY}s before restarting server on port {args.port}...")
+      time.sleep(RECOVERY_DELAY)
+      print(f"Restarting server on port {args.port}...")
+
