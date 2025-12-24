@@ -14,7 +14,9 @@ source venv/bin/activate
 pip install grpcio grpcio-tools opencv-python numpy
 
 #MAKE SURE THIS OUTPUTS A PYTHIN PATH INSIDE VENV ex. /home/asus/image-processing/phase3/venv/bin/python
-which python
+
+which python (da el command to see)
+
 #if not go to section debug python
 
 #this should show grpcio w grpcio-tools, numpy, protobuf
@@ -46,6 +48,7 @@ cd phase3
 source venv/bin/activate
 
 which python
+
 #should show ../phase3/venv/python
 
 python {command: ex. server.py 50051, server.py 50052, client.py}
@@ -66,10 +69,10 @@ There are 2 ways to inject failures
 
         use this
         ``` cmd
-            python failing_server.py {port} --kill {optional: --count (time in secs), deafult 10 secs}
+            python failing_server.py {port} --kill {optional: --count (time in secs), deafult 10 secs, --recovery (time to recover)}
 
             #example usage
-            python failing_server.py 50051 --kill -- count 5
+            python failing_server.py 50051 --kill --count 5 --recovery 5
         ```
 
 2- client timeout
