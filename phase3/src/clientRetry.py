@@ -25,11 +25,12 @@ with open(IMAGE_PATH, "rb") as f:
     image = f.read()
 
 NORMAL_TIMEOUT = 10
+DISRUPTION_TIMEOUT = 0.1
 
 start = time.time()
 request_count = 0
 responses = [] 
-MAX_RETRIES = 5
+MAX_RETRIES = 3
 
 while time.time() - start < 60:
     timeout_val = NORMAL_TIMEOUT  
@@ -38,15 +39,6 @@ while time.time() - start < 60:
     success = False
     for attempt in range(MAX_RETRIES):
         stub = next(stub_cycle)  
-        stub_idx = stubs.index(stub) 
-        channel = channels[stub_idx]
-        
-        try:
-            grpc.channel_ready_future(channel).result(timeout=0.1)
-        except grpc.FutureTimeoutError:
-            print(f"Channel {SERVERS[stub_idx]} not READY → skipping to next (attempt {attempt + 1}/{MAX_RETRIES})")
-            continue  
-        
         t0 = time.time()
         try:
             resp = stub.DetectEdges(
@@ -55,19 +47,20 @@ while time.time() - start < 60:
             )
             total_time = time.time() - t0
             responses.append((current_req, resp.edges))
-            print(f"OK latency={resp.latency:.3f}s total={total_time:.3f}s (via {SERVERS[stub_idx]})")
+            print(f"OK latency={resp.latency:.3f}s total={total_time:.3f}s")
             success = True
             break
 
         except Exception:
             retry_time = time.time() - t0
-            print(f"Server {SERVERS[stub_idx]} failed on attempt {attempt + 1} → retrying in {retry_time:.3f}s")
-            time.sleep(0.2)
+            if attempt < MAX_RETRIES - 1:
+                print(f"Server failed on attempt {attempt + 1} → retrying in {retry_time:.3f}s")
+                time.sleep(0.2)
+            else:
+                print(f"All {MAX_RETRIES} retries failed for req {current_req} → skipping")
 
-    if not success:
-        print(f"All {MAX_RETRIES} retries failed for req {current_req} → skipping")
-
-    request_count += 1  
+    if success:
+        request_count += 1
 
 OUTPUT_DIR = os.path.join(BASE_DIR, "..", "output")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
