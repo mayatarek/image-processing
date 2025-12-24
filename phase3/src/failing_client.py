@@ -25,7 +25,7 @@ with open(IMAGE_PATH, "rb") as f:
     image = f.read()
 
 NORMAL_TIMEOUT = 10
-DISRUPTION_TIMEOUT = 0.1
+DISRUPTION_TIMEOUT = 0.085
 better_timeout = 0.5
 
 def better_network(meow):
@@ -36,7 +36,7 @@ def better_network(meow):
 start = time.time()
 request_count = 0
 responses = [] 
-MAX_RETRIES = 3
+MAX_RETRIES = 5
 
 while time.time() - start < 60:
     
