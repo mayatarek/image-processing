@@ -1,0 +1,54 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+
+# Check if file exists
+if not os.path.exists('metrics.csv'):
+    print("Error: 'metrics.csv' not found. Please run client.py first.")
+    exit()
+
+# 1. Load the data
+try:
+    data = pd.read_csv('metrics.csv')
+    if data.empty:
+        print("Error: 'metrics.csv' is empty.")
+        exit()
+except Exception as e:
+    print(f"Error reading CSV: {e}")
+    exit()
+
+# Convert timestamp to "Time since start" (seconds)
+start_time = data['Timestamp'].min()
+data['TimeRelative'] = data['Timestamp'] - start_time
+
+# --- GRAPH 1: Latency vs Time ---
+plt.figure(figsize=(10, 5))
+plt.plot(data['TimeRelative'], data['Latency'], label='Latency', color='blue', alpha=0.6)
+
+# Calculate P95 (95th percentile)
+p95 = data['Latency'].quantile(0.95)
+plt.axhline(y=p95, color='red', linestyle='--', label=f'P95 Latency ({p95:.3f}s)')
+
+plt.title('Latency vs Time (with Failures)')
+plt.xlabel('Time (seconds)')
+plt.ylabel('Latency (seconds)')
+plt.legend()
+plt.grid(True)
+plt.savefig('graph_latency.png')
+print("Saved graph_latency.png")
+
+# --- GRAPH 2: Throughput vs Time ---
+# Group data into 1-second buckets
+data['Second'] = data['TimeRelative'].astype(int)
+throughput = data[data['Status'] == 'Success'].groupby('Second').size()
+
+plt.figure(figsize=(10, 5))
+plt.plot(throughput.index, throughput.values, label='Throughput', color='green')
+
+plt.title('Throughput (Requests/Sec) vs Time')
+plt.xlabel('Time (seconds)')
+plt.ylabel('Requests per Second')
+plt.legend()
+plt.grid(True)
+plt.savefig('graph_throughput.png')
+print("
