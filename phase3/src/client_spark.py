@@ -103,8 +103,15 @@ def send_image_request(image, current_req, timeout_val=NORMAL_TIMEOUT):
                 success = True
                 break
 
-            except Exception:
+            except Exception as e:
                 retry_time = time.time() - t0
+                print(f"Exception occurred: {e}")  # prints the actual error message
+                # optional: print full traceback
+                import traceback
+                traceback.print_exc()
+                
+                import traceback
+                traceback.print_exc()
                 # writer.writerow([time.time(), retry_time, "Failure"]) # record failed attempt in CSV
                 print(f"Server {SERVERS[stub_idx]} failed on attempt {attempt + 1} → retrying in {retry_time:.3f}s")
                 time.sleep(0.2)
@@ -154,13 +161,26 @@ input = spark.readStream.format('binaryFile').option("path", "../data").option("
 # each micro batch is a df (spark give it to us with a batch id), every row corresponds to an image
 # each image have its row
 
+# def process_batch(batch_df, batch_id):
+#     #converting the df in spark memory into python rows using collect()
+#     #each row represents 1 image as we said above 
+#     for row in batch_df.collect():
+#         image_bytes = row.content 
+#         print("sendng image request")
+    
+#         send_image_request(image_bytes, current_req)
+#         print("request ended")
+request_count = 0      
+        
 def process_batch(batch_df, batch_id):
-    #converting the df in spark memory into python rows using collect()
-    #each row represents 1 image as we said above 
+    global request_count
     for row in batch_df.collect():
-        image_bytes = row.content 
-        current_req = int(time.time() *1000) #making an id for each request
+        print(f"sending request #{request_count}")
+        image_bytes = row.content
+        current_req = request_count  # small integer ID
+        request_count += 1
         send_image_request(image_bytes, current_req)
+    print("process batch done")       
         
 # making spark call the process_batch function we made
 # reads images (input mentioned above) and calls the processing function on each micro batch

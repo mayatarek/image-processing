@@ -14,6 +14,7 @@ import sys
 class EdgeService(edge_pb2_grpc.EdgeServiceServicer):
     #hena el class beya5od el request w el context mesh hanesta5demo bas grpc beyrequire en it gets passed
     def DetectEdges(self, request, context):
+      print("meowwwwwwwwooooooooooooowwwwwwwwwwwwwwwwwooooooooooowwwwww")
       try:
         print(f"Received request# {request.req_num}")
         start = time.time()
@@ -41,11 +42,11 @@ def serve(port):
     server.add_insecure_port(f"[::]:{port}")
     server.start()
     print(f"Server started on port {port}")
-    # server.wait_for_termination()
-    while True:
-      print(f"Server on port {port} will sleep for 30")
-      time.sleep(30)
-      print(f"Server on port {port} woke up")
+    server.wait_for_termination()
+    # while True:
+    #   print(f"Server on port {port} will sleep for 30")
+    #   time.sleep(30)
+    #   print(f"Server on port {port} woke up")
 
 if __name__ == "__main__":
     #lamma ne run python server.py 50051, el server.py de argv[0] wel 50051 de argv[1]
