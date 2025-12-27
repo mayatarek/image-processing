@@ -8,7 +8,7 @@ import random  # random image selection
 import edge_pb2
 import edge_pb2_grpc
 
-TARGET_RATE = 10           # requests per second (adjustable input rate)
+TARGET_RATE = 1000        # requests per second (Adjustable input rate)
 DURATION_SECONDS = 60      # test duration (at least 60 seconds)
 IMAGE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data") # Folder containing images
 
