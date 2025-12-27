@@ -3,6 +3,7 @@ import time
 import itertools
 import os
 import csv 
+from datetime import datetime
 
 import edge_pb2
 import edge_pb2_grpc
@@ -28,6 +29,7 @@ start = time.time()
 request_count = 0
 responses = [] 
 MAX_RETRIES = 5
+RATE_LIMIT_DELAY = 0.5 # adjustable input rate limit delay in seconds (sleeps 0.5 between requests)
 
 with open('metrics.csv', mode='w', newline='') as csv_file: # open CSV file for writing
     writer = csv.writer(csv_file)
@@ -56,12 +58,13 @@ with open('metrics.csv', mode='w', newline='') as csv_file: # open CSV file for 
                     timeout=timeout_val
                 )
                 total_time = time.time() - t0
-                
+                ts_str = datetime.now().strftime("%H:%M:%S.%f")[:-3] # timestamp for logging
              
                 writer.writerow([time.time(), total_time, "Success"]) # record successful response in CSV
                 
                 responses.append((current_req, resp.edges))
-                print(f"OK latency={resp.latency:.3f}s total={total_time:.3f}s (via {SERVERS[stub_idx]})")
+
+                print(f"[{ts_str}] OK latency={resp.latency:.3f}s total={total_time:.3f}s (via {SERVERS[stub_idx]})") # log with timestamp and server info
                 success = True
                 break
 
@@ -75,6 +78,7 @@ with open('metrics.csv', mode='w', newline='') as csv_file: # open CSV file for 
             print(f"All {MAX_RETRIES} retries failed for req {current_req} → skipping")
 
         request_count += 1  
+        time.sleep(RATE_LIMIT_DELAY) # rate limiting delay
 
 OUTPUT_DIR = os.path.join(BASE_DIR, "..", "output")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
