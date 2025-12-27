@@ -33,11 +33,14 @@ bas try this ig
 check again if it works, law la2 idk da a5ry
 
 
-### **To run** (Note: ***each in a diff terminal and in a venv***)
+### **To run** (Note: ***each command of the 3 in a diff terminal and in the same venv***) make the venv once, and activate it in the terminals
 ``` xmd
 cd src
-python server.py 50051
+1)
+python server.py 50051 
+2)
 python server.py 50052
+3)
 python client.py
 ```
 
@@ -50,6 +53,8 @@ source venv/bin/activate
 which python
 
 #should show ../phase3/venv/python
+
+cd src
 
 python {command: ex. server.py 50051, server.py 50052, client.py}
 ```
@@ -88,4 +93,10 @@ There are 2 ways to inject failures
         ```cmd
             python failing_client.py
         ```
+
+for spark:
+sudo apt update
+sudo apt install openjdk-17-jdk
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
 
